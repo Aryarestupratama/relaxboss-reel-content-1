@@ -31,3 +31,23 @@ export const sceneFrames = (key: SceneKey): number => {
   const s = SCENES.find((x) => x.key === key)!;
   return sec(s.endSec) - sec(s.startSec);
 };
+
+/** Scene yang masuk mulai tampil sebesar ini sebelum batas scene (setengah transisi). */
+export const LEAD_SEC = TRANSITION_SEC / 2;
+
+/** Titik asal lingkaran saat scene masuk (pusat elemen fokus scene sebelumnya). */
+export const WIPE_ORIGIN: Partial<Record<SceneKey, { x: number; y: number }>> = {
+  pick: { x: 540, y: 960 }, // pusat blob ungu scene Hook
+};
+export const DEFAULT_WIPE_ORIGIN = { x: 540, y: 960 };
+
+/** Rentang Sequence tiap scene (frame), sudah termasuk tumpang tindih transisi. */
+export const sceneRange = (index: number): { from: number; duration: number; leadSec: number } => {
+  const s = SCENES[index];
+  const isFirst = index === 0;
+  const isLast = index === SCENES.length - 1;
+  const leadSec = isFirst ? 0 : LEAD_SEC;
+  const from = sec(s.startSec - leadSec);
+  const to = sec(s.endSec + (isLast ? 0 : LEAD_SEC));
+  return { from, duration: to - from, leadSec };
+};

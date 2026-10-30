@@ -12,6 +12,7 @@ npm run dev          # buka Remotion Studio (pratinjau)
 npm run typecheck    # cek TypeScript
 npm run still:blobs  # render still barisan blob   -> out/blobs.png
 npm run still:compare# render perbandingan blob asli vs SVG -> out/blob-compare.png
+npm run preview:s1   # pratinjau Scene 1 (0-3,9 dtk)  -> out/scene1-preview.mp4
 npm run render       # render video penuh          -> out/relaxboss-reel.mp4
 ```
 
@@ -27,7 +28,9 @@ src/
   timeline.ts   enam scene dan batas waktunya (satu-satunya tempat durasi scene)
   motion.ts     helper animasi: tween, springIn, breath, typedLength
   fonts.ts      pemuatan font lokal
-  components/   Blob.tsx (blob mood 1-5 sebagai SVG)
+  components/   Blob (blob mood 1-5, SVG), Typewriter, CircleReveal (transisi)
+  scenes/       satu file per scene (Scene1Hook, ...)
+  sceneClock.tsx  waktu relatif terhadap batas scene (useSceneFrame)
   stills/       still pemeriksaan (bukan bagian video akhir)
   Reel.tsx      komposisi utama (saat ini kerangka scene)
 ```
@@ -41,10 +44,12 @@ src/
 ## Progres
 
 - [x] Step 1: setup proyek, tema, timeline, komponen `Blob`
-- [ ] Step 2: Scene 1 (Hook) dan Scene 2 (Pilih mood)
-- [ ] Step 3: Scene 3 (Mood Tracker) dan Scene 4 (Asesmen)
-- [ ] Step 4: Scene 5 (RelaxMate)
-- [ ] Step 5: Scene 6 (CTA), transisi lingkaran, render penuh
-- [ ] Step 6: pemeriksaan, cover, versi 4:5
+- [x] Step 2: Scene 1 (Hook), `Typewriter`, `CircleReveal`, `SceneClock`
+- [ ] Step 3: Scene 2 (Pilih mood)
+- [ ] Step 4: Scene 3 (Mood Tracker)
+- [ ] Step 5: Scene 4 (Asesmen)
+- [ ] Step 6: Scene 5 (RelaxMate, sprite robot)
+- [ ] Step 7: Scene 6 (CTA) dan render penuh 27 detik
+- [ ] Step 8: pemeriksaan, cover, versi 4:5
 
 Audio ditunda sampai video disetujui.

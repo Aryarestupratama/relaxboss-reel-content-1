@@ -9,7 +9,8 @@
     "render": "remotion render RelaxBossReel out/relaxboss-reel.mp4 --codec=h264 --crf=18",
     "still:blobs": "remotion still BlobLineup out/blobs.png",
     "still:compare": "remotion still BlobCompare out/blob-compare.png",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "preview:s1": "remotion render RelaxBossReel out/scene1-preview.mp4 --frames=0-116 --codec=h264 --crf=20"
   },
   "dependencies": {
     "@fontsource/plus-jakarta-sans": "^5.3.0",
