@@ -1,0 +1,26 @@
+{
+  "name": "relaxboss-reel",
+  "version": "0.1.0",
+  "description": "Video motion RelaxBoss untuk Instagram Reels (Remotion)",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "remotion studio",
+    "render": "remotion render RelaxBossReel out/relaxboss-reel.mp4 --codec=h264 --crf=18",
+    "still:blobs": "remotion still BlobLineup out/blobs.png",
+    "still:compare": "remotion still BlobCompare out/blob-compare.png",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource/plus-jakarta-sans": "^5.3.0",
+    "@remotion/cli": "4.0.535",
+    "@remotion/fonts": "^4.0.535",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.535"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "typescript": "5.9.3"
+  }
+}
