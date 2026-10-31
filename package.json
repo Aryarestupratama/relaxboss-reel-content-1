@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "remotion studio",
     "render": "remotion render RelaxBossReel out/relaxboss-reel.mp4 --codec=h264 --crf=18",
+    "audio": "python3 audio/make_audio.py out/relaxboss-reel.mp4 out/relaxboss-reel-4x5.mp4",
     "still:cover": "remotion still Cover out/cover.png",
     "render:45": "remotion render RelaxBossReel45 out/relaxboss-reel-4x5.mp4 --codec=h264 --crf=18",
     "still:blobs": "remotion still BlobLineup out/blobs.png",

@@ -56,3 +56,10 @@ src/
 - [x] Step 8: poles, cover (`npm run still:cover`), versi 4:5 (`npm run render:45`), total 27,8 dtk (834 frame)
 
 Audio ditunda sampai video disetujui.
+
+## Audio (Step 9)
+
+`npm run audio` membuat musik + efek suara dari kode (`audio/make_audio.py`, butuh Python 3, numpy, scipy, ffmpeg),
+membaca waktu dari `src/timeline.ts`, menormalkan ke -14 LUFS, lalu menambahkan suara ke MP4 (`*-audio.mp4`).
+Keluaran: `out/audio/relaxboss-audio.wav|mp3` (musik + efek) dan `relaxboss-music.wav` (musik saja).
+Jalankan `npm run render` dan `npm run render:45` lebih dulu. Jika timing scene berubah, jalankan ulang.
