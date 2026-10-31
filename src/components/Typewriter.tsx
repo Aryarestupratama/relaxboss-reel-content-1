@@ -4,7 +4,7 @@
 import React, { type CSSProperties } from "react";
 import { COLORS, sec } from "../theme";
 import { typedLength } from "../motion";
-import { useSceneFrame } from "../sceneClock";
+import { useVideoFrame } from "../sceneClock";
 
 type Props = {
   /** Satu elemen per baris. Spasi antar-baris dihitung sebagai satu karakter. */
@@ -18,11 +18,11 @@ type Props = {
 export const Typewriter: React.FC<Props> = ({
   lines,
   startSec,
-  charsPerSec = 16,
+  charsPerSec = 13,
   style,
   cursorColor = COLORS.navy,
 }) => {
-  const frame = useSceneFrame();
+  const frame = useVideoFrame();
   const fullText = lines.join(" ");
   const n = typedLength(frame, startSec, fullText, charsPerSec);
   const typing = frame >= sec(startSec) && n < fullText.length;

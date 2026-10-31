@@ -3,26 +3,25 @@
 // kamera mendorong pelan menuju transisi lingkaran.
 import React from "react";
 import { AbsoluteFill } from "remotion";
-import { Blob } from "../components/Blob";
+import { Blob, BLOB_VISUAL_CENTER_Y } from "../components/Blob";
 import { Typewriter } from "../components/Typewriter";
 import { COLORS, EASE, TYPE } from "../theme";
 import { tween } from "../motion";
 import { fontFamily } from "../fonts";
-import { useSceneFrame } from "../sceneClock";
+import { useVideoFrame } from "../sceneClock";
 
 const BLOB_SIZE = 440;
 const BLOB_CENTER = { x: 540, y: 960 }; // pusat visual blob (titik asal transisi)
-// Pusat visual blob berada sekitar 0,49 x ukuran dari tepi atas kotak SVG.
 const BLOB_BOX = {
   left: BLOB_CENTER.x - BLOB_SIZE / 2,
-  top: BLOB_CENTER.y - BLOB_SIZE * 0.49,
+  top: BLOB_CENTER.y - BLOB_SIZE * BLOB_VISUAL_CENTER_Y,
 };
 
 const TITLE_LINES = ["Capek,", "tapi nggak", "tahu kenapa?"];
 const TITLE_SIZE = 104; // dalam rentang 96-112 (TYPE)
 
 export const Scene1Hook: React.FC = () => {
-  const frame = useSceneFrame();
+  const frame = useVideoFrame();
 
   // Menghela napas 1,00-1,50 dtk: turun 14 px, memipih 1,04 x 0,96, lalu kembali.
   const t = tween(frame, 1.0, 1.5, 0, 1, (x) => x); // linear 0-1
@@ -46,8 +45,8 @@ export const Scene1Hook: React.FC = () => {
       >
         <Typewriter
           lines={TITLE_LINES}
-          startSec={0.3}
-          charsPerSec={17}
+          startSec={0.2}
+          charsPerSec={13}
           style={{
             position: "absolute",
             left: 0,

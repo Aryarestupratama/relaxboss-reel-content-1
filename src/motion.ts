@@ -52,3 +52,15 @@ export const typedLength = (
     0,
     Math.min(text.length, Math.floor(((frame - sec(startSec)) / FPS) * charsPerSec)),
   );
+
+/** Squash saat mendarat: 1,12 x 0,88 lalu kembali ke 1 x 1 dalam 0,25 dtk. */
+export const landSquash = (
+  frame: number,
+  landSec: number,
+  amount = 0.12,
+  durationSec = 0.25,
+): { sx: number; sy: number } => {
+  const t = tween(frame, landSec, landSec + durationSec, 0, 1, EASE.out);
+  const a = frame < sec(landSec) ? 0 : amount * (1 - t);
+  return { sx: 1 + a, sy: 1 - a };
+};

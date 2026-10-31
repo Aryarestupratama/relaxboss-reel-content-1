@@ -4,8 +4,9 @@ import React from "react";
 import { AbsoluteFill, Sequence } from "remotion";
 import { CircleReveal } from "./components/CircleReveal";
 import { Scene1Hook } from "./scenes/Scene1Hook";
-import { SceneClock, useSceneFrame } from "./sceneClock";
-import { COLORS, FPS } from "./theme";
+import { Scene2Pick } from "./scenes/Scene2Pick";
+import { SceneClock, useVideoFrame } from "./sceneClock";
+import { COLORS, FPS, sec } from "./theme";
 import {
   DEFAULT_WIPE_ORIGIN,
   SCENES,
@@ -15,12 +16,13 @@ import {
 } from "./timeline";
 import { fontFamily } from "./fonts";
 
-const Placeholder: React.FC<{ label: string; index: number; bg: string }> = ({
-  label,
-  index,
-  bg,
-}) => {
-  const frame = useSceneFrame();
+const Placeholder: React.FC<{
+  label: string;
+  index: number;
+  bg: string;
+  startSec: number;
+}> = ({ label, index, bg, startSec }) => {
+  const frame = useVideoFrame() - sec(startSec);
   return (
     <AbsoluteFill
       style={{
@@ -44,22 +46,23 @@ const Placeholder: React.FC<{ label: string; index: number; bg: string }> = ({
 
 const BUILT: Partial<Record<SceneKey, React.FC>> = {
   hook: Scene1Hook,
+  pick: Scene2Pick,
 };
 
 export const Reel: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: COLORS.bgCream }}>
     {SCENES.map((s, i) => {
-      const { from, duration, leadSec } = sceneRange(i);
+      const { from, duration } = sceneRange(i);
       const Scene = BUILT[s.key];
       const content = Scene ? (
         <Scene />
       ) : (
-        <Placeholder label={s.label} index={i} bg={s.bg} />
+        <Placeholder label={s.label} index={i} bg={s.bg} startSec={s.startSec} />
       );
       const origin = WIPE_ORIGIN[s.key] ?? DEFAULT_WIPE_ORIGIN;
       return (
         <Sequence key={s.key} name={s.label} from={from} durationInFrames={duration}>
-          <SceneClock leadSec={leadSec}>
+          <SceneClock fromFrame={from}>
             {i === 0 ? (
               content
             ) : (
