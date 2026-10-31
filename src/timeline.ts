@@ -3,6 +3,7 @@
 import { sec } from "./theme";
 import { LAST_POINT_SCREEN } from "./scenes/scene3Layout";
 import { RESULT_CENTER_SCREEN } from "./scenes/scene4Layout";
+import { BLOB_CENTER_SCREEN } from "./scenes/scene5Layout";
 
 export const TRANSITION_SEC = 0.5;
 
@@ -49,6 +50,7 @@ export const WIPE_ORIGIN: Partial<Record<SceneKey, { x: number; y: number }>> = 
   mood: { x: 540, y: 960 }, // pusat blob ungu di akhir scene Pilih mood
   assess: LAST_POINT_SCREEN, // titik terakhir grafik Mood Tracker
   chat: RESULT_CENTER_SCREEN, // pusat kartu hasil Asesmen
+  cta: BLOB_CENTER_SCREEN, // blob hijau di akhir RelaxMate
 };
 export const DEFAULT_WIPE_ORIGIN = { x: 540, y: 960 };
 

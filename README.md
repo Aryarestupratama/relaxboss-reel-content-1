@@ -51,7 +51,7 @@ src/
 - [x] Step 3: Scene 2 (Pilih mood), `SlamTitle`, `TapCursor`, `Splash`, ketikan diperlambat
 - [x] Step 4: Scene 3 (Mood Tracker), `Card`, `Pill`, `MoodChart`
 - [x] Step 5: Scene 1 +0,4 dtk, blob barisan Scene 2 diperbesar, Scene 4 (Asesmen), `ScoreRow`
-- [ ] Step 6: Scene 5 (RelaxMate, sprite robot)
+- [x] Step 6: Scene 5 (RelaxMate), `RobotSprite`
 - [ ] Step 7: Scene 6 (CTA) dan render penuh 27 detik
 - [ ] Step 8: pemeriksaan, cover, versi 4:5
 

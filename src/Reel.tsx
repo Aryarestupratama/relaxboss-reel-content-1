@@ -7,6 +7,7 @@ import { Scene1Hook } from "./scenes/Scene1Hook";
 import { Scene2Pick } from "./scenes/Scene2Pick";
 import { Scene3Mood } from "./scenes/Scene3Mood";
 import { Scene4Assess } from "./scenes/Scene4Assess";
+import { Scene5Chat } from "./scenes/Scene5Chat";
 import { SceneClock, useVideoFrame } from "./sceneClock";
 import { COLORS, FPS, sec } from "./theme";
 import {
@@ -51,6 +52,7 @@ const BUILT: Partial<Record<SceneKey, React.FC>> = {
   pick: Scene2Pick,
   mood: Scene3Mood,
   assess: Scene4Assess,
+  chat: Scene5Chat,
 };
 
 export const Reel: React.FC = () => (
