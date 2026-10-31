@@ -1,5 +1,5 @@
 // Pembagian scene. Batas scene = titik tengah transisi lingkaran (0,5 dtk).
-// Total 27,4 dtk = 822 frame. Sumber: storyboard bagian 1, Scene 1 diperpanjang 0,4 dtk.
+// Total 27,8 dtk = 834 frame. Sumber: storyboard bagian 1, Scene 1 diperpanjang 0,4 dtk.
 import { sec } from "./theme";
 import { LAST_POINT_SCREEN } from "./scenes/scene3Layout";
 import { RESULT_CENTER_SCREEN } from "./scenes/scene4Layout";
@@ -27,7 +27,7 @@ export const SCENES: ReadonlyArray<{
   { key: "mood", label: "Mood Tracker", startSec: 7.0, endSec: 12.8, shiftSec: 0.4, bg: "#CDE5F8" },
   { key: "assess", label: "Asesmen", startSec: 12.8, endSec: 18.4, shiftSec: 0.4, bg: "#FFDCCB" },
   { key: "chat", label: "RelaxMate", startSec: 18.4, endSec: 23.6, shiftSec: 0.4, bg: "#D5F4D0" },
-  { key: "cta", label: "CTA", startSec: 23.6, endSec: 27.4, shiftSec: 0.4, bg: "#DED4FF" },
+  { key: "cta", label: "CTA", startSec: 23.6, endSec: 27.8, shiftSec: 0.4, bg: "#DED4FF" },
 ];
 
 export const TOTAL_SEC = SCENES[SCENES.length - 1].endSec;

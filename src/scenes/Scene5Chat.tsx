@@ -60,7 +60,9 @@ export const Scene5Chat: React.FC = () => {
   // ---- Robot ----
   const walkP = tween(frame, 18.0, 18.55, 0, 1, EASE.out);
   const robotCx = 1340 + (ROBOT_X - 1340) * walkP;
-  let state: RobotState = "walk";
+  // Sprite "walk" memakai desain karakter yang berbeda, jadi robot masuk dengan sprite
+  // "idle" yang meluncur sambil memantul pelan (satu karakter yang konsisten).
+  let state: RobotState = "idle";
   let stateStart = sec(18.0);
   if (frame >= sec(20.85)) {
     state = "speaking";
@@ -73,6 +75,8 @@ export const Scene5Chat: React.FC = () => {
     stateStart = sec(18.6);
   }
   const robotIn = tween(frame, 18.0, 18.2, 0, 1);
+  const walking = frame < sec(18.6);
+  const bob = walking ? -16 * Math.abs(Math.sin(((frame / FPS - 18.0) * Math.PI) / 0.2)) : 0;
 
   // ---- Kapsul ----
   const capsule = springIn(frame, 18.6, SPRING.pop);
@@ -84,10 +88,13 @@ export const Scene5Chat: React.FC = () => {
   const land = landSquash(frame, 18.45);
   const toPeach = tween(frame, 20.9, 21.4, 0, 1, EASE.inOut);
   const toGreen = tween(frame, 22.0, 22.4, 0, 1, EASE.inOut);
+  // Peach -> hijau: ganti warna di tengah dengan pop kecil, tanpa campuran keruh.
   const fill =
     frame < sec(22.0)
       ? mix(MOOD_FILL[1], MOOD_FILL[3], toPeach)
-      : mix(MOOD_FILL[3], MOOD_FILL[4], toGreen);
+      : toGreen < 0.5
+        ? MOOD_FILL[3]
+        : MOOD_FILL[4];
   const face = frame >= sec(22.2) ? 4 : frame >= sec(21.15) ? 3 : 1;
   // Pop kecil saat wajah berganti
   const popA = Math.sin(Math.PI * tween(frame, 20.9, 21.4, 0, 1));
@@ -241,7 +248,7 @@ export const Scene5Chat: React.FC = () => {
         style={{
           position: "absolute",
           left: robotCx - ROBOT_W / 2,
-          top: ROBOT_TOP,
+          top: ROBOT_TOP + bob,
           opacity: robotIn,
         }}
       >
@@ -250,7 +257,6 @@ export const Scene5Chat: React.FC = () => {
           stateStartFrame={stateStart}
           frame={frame}
           height={ROBOT_H}
-          flip={state === "walk"}
         />
       </div>
 

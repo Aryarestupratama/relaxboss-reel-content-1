@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "remotion studio",
     "render": "remotion render RelaxBossReel out/relaxboss-reel.mp4 --codec=h264 --crf=18",
+    "still:cover": "remotion still Cover out/cover.png",
+    "render:45": "remotion render RelaxBossReel45 out/relaxboss-reel-4x5.mp4 --codec=h264 --crf=18",
     "still:blobs": "remotion still BlobLineup out/blobs.png",
     "still:compare": "remotion still BlobCompare out/blob-compare.png",
     "typecheck": "tsc --noEmit",

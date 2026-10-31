@@ -53,6 +53,6 @@ src/
 - [x] Step 5: Scene 1 +0,4 dtk, blob barisan Scene 2 diperbesar, Scene 4 (Asesmen), `ScoreRow`
 - [x] Step 6: Scene 5 (RelaxMate), `RobotSprite`
 - [x] Step 7: Scene 6 (CTA) dan render penuh 27,4 detik
-- [ ] Step 8: pemeriksaan, cover, versi 4:5
+- [x] Step 8: poles, cover (`npm run still:cover`), versi 4:5 (`npm run render:45`), total 27,8 dtk (834 frame)
 
 Audio ditunda sampai video disetujui.
