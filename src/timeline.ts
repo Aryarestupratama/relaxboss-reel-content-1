@@ -1,6 +1,7 @@
 // Pembagian scene. Batas scene = titik tengah transisi lingkaran (0,5 dtk).
 // Total 27,0 dtk = 810 frame. Sumber: storyboard bagian 1.
 import { sec } from "./theme";
+import { LAST_POINT_SCREEN } from "./scenes/scene3Layout";
 
 export const TRANSITION_SEC = 0.5;
 
@@ -39,6 +40,7 @@ export const LEAD_SEC = TRANSITION_SEC / 2;
 export const WIPE_ORIGIN: Partial<Record<SceneKey, { x: number; y: number }>> = {
   pick: { x: 540, y: 960 }, // pusat blob ungu scene Hook
   mood: { x: 540, y: 960 }, // pusat blob ungu di akhir scene Pilih mood
+  assess: LAST_POINT_SCREEN, // titik terakhir grafik Mood Tracker
 };
 export const DEFAULT_WIPE_ORIGIN = { x: 540, y: 960 };
 

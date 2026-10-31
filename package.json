@@ -11,7 +11,8 @@
     "still:compare": "remotion still BlobCompare out/blob-compare.png",
     "typecheck": "tsc --noEmit",
     "preview:s1": "remotion render RelaxBossReel out/scene1-preview.mp4 --frames=0-116 --codec=h264 --crf=20",
-    "preview:s1-s2": "remotion render RelaxBossReel out/scene1-2-preview.mp4 --frames=0-210 --codec=h264 --crf=20"
+    "preview:s1-s2": "remotion render RelaxBossReel out/scene1-2-preview.mp4 --frames=0-210 --codec=h264 --crf=20",
+    "preview:s1-s3": "remotion render RelaxBossReel out/scene1-3-preview.mp4 --frames=0-384 --codec=h264 --crf=20"
   },
   "dependencies": {
     "@fontsource/plus-jakarta-sans": "^5.3.0",

@@ -28,7 +28,7 @@ export const springIn = (
   frame: number,
   startSec: number,
   config: Record<string, number> = SPRING.bouncy,
-): number => spring({ frame: frame - sec(startSec), fps: FPS, config });
+): number => spring({ frame: Math.max(0, frame - sec(startSec)), fps: FPS, config });
 
 /** Napas pelan: 1 -> 1 + amplitude, periode dalam detik. */
 export const breath = (

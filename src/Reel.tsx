@@ -5,6 +5,7 @@ import { AbsoluteFill, Sequence } from "remotion";
 import { CircleReveal } from "./components/CircleReveal";
 import { Scene1Hook } from "./scenes/Scene1Hook";
 import { Scene2Pick } from "./scenes/Scene2Pick";
+import { Scene3Mood } from "./scenes/Scene3Mood";
 import { SceneClock, useVideoFrame } from "./sceneClock";
 import { COLORS, FPS, sec } from "./theme";
 import {
@@ -47,6 +48,7 @@ const Placeholder: React.FC<{
 const BUILT: Partial<Record<SceneKey, React.FC>> = {
   hook: Scene1Hook,
   pick: Scene2Pick,
+  mood: Scene3Mood,
 };
 
 export const Reel: React.FC = () => (
