@@ -6,6 +6,7 @@ import { CircleReveal } from "./components/CircleReveal";
 import { Scene1Hook } from "./scenes/Scene1Hook";
 import { Scene2Pick } from "./scenes/Scene2Pick";
 import { Scene3Mood } from "./scenes/Scene3Mood";
+import { Scene4Assess } from "./scenes/Scene4Assess";
 import { SceneClock, useVideoFrame } from "./sceneClock";
 import { COLORS, FPS, sec } from "./theme";
 import {
@@ -49,22 +50,23 @@ const BUILT: Partial<Record<SceneKey, React.FC>> = {
   hook: Scene1Hook,
   pick: Scene2Pick,
   mood: Scene3Mood,
+  assess: Scene4Assess,
 };
 
 export const Reel: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: COLORS.bgCream }}>
     {SCENES.map((s, i) => {
-      const { from, duration } = sceneRange(i);
+      const { from, duration, shiftFrames } = sceneRange(i);
       const Scene = BUILT[s.key];
       const content = Scene ? (
         <Scene />
       ) : (
-        <Placeholder label={s.label} index={i} bg={s.bg} startSec={s.startSec} />
+        <Placeholder label={s.label} index={i} bg={s.bg} startSec={s.startSec - s.shiftSec} />
       );
       const origin = WIPE_ORIGIN[s.key] ?? DEFAULT_WIPE_ORIGIN;
       return (
         <Sequence key={s.key} name={s.label} from={from} durationInFrames={duration}>
-          <SceneClock fromFrame={from}>
+          <SceneClock fromFrame={from - shiftFrames}>
             {i === 0 ? (
               content
             ) : (

@@ -13,11 +13,11 @@ import { fontFamily } from "../fonts";
 import { useVideoFrame } from "../sceneClock";
 import { sceneRange } from "../timeline";
 
-const SMALL = 150;
+const SMALL = 172; // 5 blob + 4 jarak 12 px = 908 px, mulai x 86 (zona aman 64-1016)
 const BIG_START = 440;
 const BIG_END = 260;
 const ROW_Y = 1000;
-const SLOT_X = [160, 350, 540, 730, 920]; // pusat 5 blob, jarak 40 px, mulai x 85
+const SLOT_X = [172, 356, 540, 724, 908]; // pusat 5 blob
 const CENTER = { x: 540, y: 960 }; // posisi blob ungu di Scene 1 dan akhir Scene 2
 
 // Fase napas disambung dari Scene 1 (Sequence Scene 2 mulai di frame `from`).
@@ -117,7 +117,7 @@ export const Scene2Pick: React.FC = () => {
 
       <Splash
         x={SLOT_X[0]}
-        y={ROW_Y - 58}
+        y={ROW_Y - Math.round(SMALL * 0.37)}
         startSec={5.0}
         color={MOOD_FILL[1]}
       />

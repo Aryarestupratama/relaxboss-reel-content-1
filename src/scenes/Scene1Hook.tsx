@@ -30,8 +30,8 @@ export const Scene1Hook: React.FC = () => {
   const sighX = 1 + 0.04 * sigh;
   const sighYScale = 1 - 0.04 * sigh;
 
-  // Kamera mendorong pelan 1,00 -> 1,03 (2,10 dtk sampai akhir transisi).
-  const push = tween(frame, 2.1, 3.45, 1, 1.03, EASE.inOut);
+  // Kamera mendorong pelan 1,00 -> 1,03 (2,60 dtk sampai akhir transisi, 3,85 dtk).
+  const push = tween(frame, 2.6, 3.85, 1, 1.03, EASE.inOut);
 
   return (
     <AbsoluteFill
