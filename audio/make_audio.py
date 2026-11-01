@@ -161,18 +161,40 @@ def load_audio(path):
     return np.frombuffer(raw, dtype=np.float32).astype(np.float64)
 
 
+def trim(x, lead_thr=0.05, tail_thr=0.01, pre=0.004, fade=0.03):
+    """Buang hening di awal (suara mulai tepat di titik yang ditaruh) dan ekor yang nyaris hening."""
+    pk = np.abs(x).max()
+    idx = np.where(np.abs(x) > pk * lead_thr)[0]
+    a = max(0, idx[0] - int(pre * SR))
+    idx2 = np.where(np.abs(x) > pk * tail_thr)[0]
+    b = idx2[-1] + 1
+    y = x[a:b].copy()
+    n = min(len(y), int(fade * SR))
+    y[-n:] *= np.linspace(1, 0, n)
+    return y
+
+
+# Panjang maksimum (detik) per efek: yang lebih panjang dimampatkan (nada ikut naik sedikit)
+FIT = {"swell": 0.8, "whoosh": 0.7, "plop": 0.4, "pop": 0.3, "tap": 0.25, "click_full": 0.3}
+
+
 def override(name):
     for ext in ("wav", "mp3", "ogg", "flac"):
         p = SAMPLES / f"{name}.{ext}"
         if p.exists():
-            x = load_audio(p)
+            x = trim(load_audio(p))
+            lim = FIT.get(name)
+            if lim and len(x) > lim * SR:
+                x = np.interp(np.linspace(0, len(x) - 1, int(lim * SR)), np.arange(len(x)), x)
             return x / max(1e-9, np.abs(x).max()) * 0.9
     return None
 
 
 def key_clicks():
     """Potong satu per satu bunyi ketik dari rekaman keyboard (deteksi onset)."""
-    p = SAMPLES / "keyboard-clicks-source.mp3"
+    p = SAMPLES / "keyboard-elevenlabs.wav"
+    if not p.exists():
+        p = SAMPLES / "keyboard-clicks-source.mp3"
     if not p.exists():
         return None
     x = load_audio(p)
@@ -224,7 +246,7 @@ def play(name, fn, t, gain, *args):
 def e_plop(t, f, gain):
     sig = OVR.get("plop")
     if sig is not None:  # sampel diubah nadanya dengan resampling sederhana
-        ratio = f / 330.0
+        ratio = (f / 330.0) ** 0.5
         idx = np.arange(0, len(sig) - 1, ratio)
         sig = np.interp(idx, np.arange(len(sig)), sig)
         add(sfx, t, sig, gain)
