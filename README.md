@@ -63,3 +63,16 @@ Audio ditunda sampai video disetujui.
 membaca waktu dari `src/timeline.ts`, menormalkan ke -14 LUFS, lalu menambahkan suara ke MP4 (`*-audio.mp4`).
 Keluaran: `out/audio/relaxboss-audio.wav|mp3` (musik + efek) dan `relaxboss-music.wav` (musik saja).
 Jalankan `npm run render` dan `npm run render:45` lebih dulu. Jika timing scene berubah, jalankan ulang.
+
+## Step 10: 60 fps, tempo lebih lambat, scene Artikel
+
+- **60 fps** (`FPS` di `src/theme.ts`). Semua animasi ditulis dalam detik, jadi tidak ada yang perlu diubah di scene.
+- **Peta waktu** ada di `src/timeline.json` (dibaca video dan skrip audio). Tiap scene punya `authStart`, `authDur`,
+  `speed` (detik nyata per detik penulisan; makin besar makin pelan) dan `holdSec` (tahan di akhir).
+  Angka detik di file scene tetap "jam penulisan" scene itu. Ingin lebih lambat atau cepat: ubah `speed`, lalu render ulang.
+- **Kecepatan ketik** (`charsPerSec` di `Typewriter`) adalah kecepatan NYATA, tidak ikut diperlambat.
+- **Scene Artikel** (`Scene7Article`, `scene7Layout.ts`) meniru halaman `/artikel` website (cari, pill kategori, kartu).
+  Judul artikelnya contoh buatan.
+- **Audio**: bunyi ketik memakai rekaman keyboard di `audio/samples/keyboard-clicks-source.mp3` (dipotong per klik).
+  Taruh `plop.wav`, `tap.wav`, `pop.wav`, `whoosh.wav`, `swell.wav` atau `click_full.wav` di `audio/samples/`
+  untuk menggantikan suara sintetis dengan nama itu, lalu `npm run audio`.

@@ -9,7 +9,7 @@ import { Pill } from "../components/Pill";
 import { ScoreRow } from "../components/ScoreRow";
 import { SlamTitle } from "../components/SlamTitle";
 import { TapCursor } from "../components/TapCursor";
-import { COLORS, EASE, MOOD_FILL, SPRING } from "../theme";
+import { COLORS, EASE, MOOD_FILL, SPRING, sec } from "../theme";
 import { springIn, tween } from "../motion";
 import { fontFamily } from "../fonts";
 import { useVideoFrame } from "../sceneClock";
@@ -50,7 +50,7 @@ export const Scene4Assess: React.FC = () => {
   const sR = springIn(frame, 14.8, SPRING.soft);
   const rRise = 1300 * (1 - sR);
   const rTilt = 3 * (1 - sR);
-  const showResult = frame >= 14.8 * 30;
+  const showResult = frame >= sec(14.8);
 
   // ---- Isi kartu pertanyaan ----
   const chosen = tween(frame, 13.8, 13.95, 0, 1);

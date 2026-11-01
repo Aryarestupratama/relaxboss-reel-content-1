@@ -1,17 +1,26 @@
-// Jam video. Storyboard menulis waktu ABSOLUT dari awal video (mis. "Scene 2, tap pada 5,00").
-// Reel membungkus tiap scene dengan SceneClock yang tahu di frame berapa Sequence-nya mulai;
-// di dalam scene, useVideoFrame() mengembalikan frame absolut video, sehingga angka
-// storyboard dipakai apa adanya. Scene yang masuk sudah tampil 0,25 dtk sebelum batas
-// scene (transisi), jadi frame-nya sudah > 0 pada saat itu.
+// Jam scene. Di dalam scene, useVideoFrame() mengembalikan frame "jam penulisan" scene itu
+// (angka detik di file scene), yang berjalan lebih lambat dari waktu nyata sebesar `speed`.
+// Sequence scene mulai 0,3 dtk sebelum batas scene (transisi), jadi frame awalnya sudah
+// berada sebelum authStart.
 import React, { createContext, useContext, type ReactNode } from "react";
 import { useCurrentFrame } from "remotion";
 
-const FromContext = createContext(0);
+type Clock = { base: number; speed: number };
+const ClockContext = createContext<Clock>({ base: 0, speed: 1 });
 
-export const SceneClock: React.FC<{ fromFrame: number; children: ReactNode }> = ({
-  fromFrame,
-  children,
-}) => <FromContext.Provider value={fromFrame}>{children}</FromContext.Provider>;
+export const SceneClock: React.FC<{
+  base: number;
+  speed: number;
+  children: ReactNode;
+}> = ({ base, speed, children }) => (
+  <ClockContext.Provider value={{ base, speed }}>{children}</ClockContext.Provider>
+);
 
-/** Frame absolut video (0 = awal video), terlepas dari Sequence tempat scene dipasang. */
-export const useVideoFrame = (): number => useCurrentFrame() + useContext(FromContext);
+/** Frame jam penulisan scene (boleh pecahan). */
+export const useVideoFrame = (): number => {
+  const { base, speed } = useContext(ClockContext);
+  return useCurrentFrame() / speed + base;
+};
+
+/** Faktor perlambatan scene (detik nyata per detik penulisan). */
+export const useSceneSpeed = (): number => useContext(ClockContext).speed;

@@ -4,7 +4,7 @@
 import { Easing } from "remotion";
 
 // ---------- Waktu ----------
-export const FPS = 30;
+export const FPS = 60;
 /** Detik -> frame. Semua waktu di proyek ini ditulis dalam detik. */
 export const sec = (n: number): number => Math.round(n * FPS);
 

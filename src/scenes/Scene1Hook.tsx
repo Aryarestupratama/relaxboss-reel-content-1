@@ -46,7 +46,7 @@ export const Scene1Hook: React.FC = () => {
         <Typewriter
           lines={TITLE_LINES}
           startSec={0.2}
-          charsPerSec={13}
+          charsPerSec={11}
           style={{
             position: "absolute",
             left: 0,

@@ -8,6 +8,7 @@ import { Scene2Pick } from "./scenes/Scene2Pick";
 import { Scene3Mood } from "./scenes/Scene3Mood";
 import { Scene4Assess } from "./scenes/Scene4Assess";
 import { Scene5Chat } from "./scenes/Scene5Chat";
+import { Scene7Article } from "./scenes/Scene7Article";
 import { Scene6Cta } from "./scenes/Scene6Cta";
 import { SceneClock, useVideoFrame } from "./sceneClock";
 import { COLORS, FPS, sec } from "./theme";
@@ -53,6 +54,7 @@ const BUILT: Partial<Record<SceneKey, React.FC>> = {
   pick: Scene2Pick,
   mood: Scene3Mood,
   assess: Scene4Assess,
+  article: Scene7Article,
   chat: Scene5Chat,
   cta: Scene6Cta,
 };
@@ -60,17 +62,17 @@ const BUILT: Partial<Record<SceneKey, React.FC>> = {
 export const Reel: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: COLORS.bgCream }}>
     {SCENES.map((s, i) => {
-      const { from, duration, shiftFrames } = sceneRange(i);
+      const { from, duration, clockBase, speed } = sceneRange(i);
       const Scene = BUILT[s.key];
       const content = Scene ? (
         <Scene />
       ) : (
-        <Placeholder label={s.label} index={i} bg={s.bg} startSec={s.startSec - s.shiftSec} />
+        <Placeholder label={s.label} index={i} bg={s.bg} startSec={s.authStart} />
       );
       const origin = WIPE_ORIGIN[s.key] ?? DEFAULT_WIPE_ORIGIN;
       return (
         <Sequence key={s.key} name={s.label} from={from} durationInFrames={duration}>
-          <SceneClock fromFrame={from - shiftFrames}>
+          <SceneClock base={clockBase} speed={speed}>
             {i === 0 ? (
               content
             ) : (

@@ -32,7 +32,7 @@ const mix = (a: string, b: string, t: number): string => {
 
 const USER_TEXT = ["Capek banget", "sama skripsi."];
 const BOT_TEXT = ["Kedengarannya berat.", "Mau cerita?"];
-const CPS = 18;
+const CPS = 14; // karakter per detik NYATA
 
 const Dots: React.FC<{ frame: number; x: number; y: number }> = ({ frame, x, y }) => (
   <div style={{ position: "absolute", left: x, top: y, display: "flex", gap: 20 }}>

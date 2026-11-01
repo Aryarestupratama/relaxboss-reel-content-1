@@ -1,0 +1,12 @@
+{
+  "transitionSec": 0.6,
+  "scenes": [
+    { "key": "hook",    "label": "Hook",         "bg": "#F7F3EA", "authStart": 0.0,  "authDur": 3.6, "speed": 1.6, "holdSec": 0 },
+    { "key": "pick",    "label": "Pilih mood",   "bg": "#FDEFA9", "authStart": 3.2,  "authDur": 3.4, "speed": 1.8, "holdSec": 0 },
+    { "key": "mood",    "label": "Mood Tracker", "bg": "#CDE5F8", "authStart": 6.6,  "authDur": 5.8, "speed": 1.6, "holdSec": 0 },
+    { "key": "assess",  "label": "Asesmen",      "bg": "#FFDCCB", "authStart": 12.4, "authDur": 5.6, "speed": 1.6, "holdSec": 0 },
+    { "key": "article", "label": "Artikel",      "bg": "#FDEFA9", "authStart": 0.0,  "authDur": 5.8, "speed": 1.6, "holdSec": 0 },
+    { "key": "chat",    "label": "RelaxMate",    "bg": "#D5F4D0", "authStart": 18.0, "authDur": 5.2, "speed": 1.8, "holdSec": 0 },
+    { "key": "cta",     "label": "CTA",          "bg": "#DED4FF", "authStart": 23.2, "authDur": 4.2, "speed": 1.4, "holdSec": 2.5 }
+  ]
+}

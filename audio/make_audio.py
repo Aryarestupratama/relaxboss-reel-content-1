@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Sintesis audio RelaxBoss Reel: musik latar + efek suara, disinkronkan ke timeline.
+Suara ketik memakai sampel keyboard asli (audio/samples/keyboard-clicks-source.mp3).
+Berkas audio/samples/<nama>.wav|mp3 (plop, tap, pop, whoosh, swell, click_full) menggantikan suara sintetis dengan nama itu.
 
 Pakai:  python3 audio/make_audio.py [video.mp4 ...]
 Output: out/audio/relaxboss-audio.wav, relaxboss-music.wav (musik saja),
@@ -16,12 +18,26 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "out" / "audio"
 SR = 44100
 
-# ---- timeline dibaca dari timeline.ts supaya selalu sinkron ----
-tl = (ROOT / "src" / "timeline.ts").read_text()
-ENDS = [float(x) for x in re.findall(r"endSec:\s*([0-9.]+)", tl)]
-TOTAL = ENDS[-1]
-BOUNDARIES = ENDS[:-1]
-SHIFT = float(re.findall(r"shiftSec:\s*([0-9.]+)", tl)[1])  # scene 2 dst.
+# ---- timeline dibaca dari src/timeline.json (sumber yang sama dengan video) ----
+import json
+TL = json.loads((ROOT / "src" / "timeline.json").read_text())
+TRANS = TL["transitionSec"]
+SC = {}
+_t = 0.0
+for s in TL["scenes"]:
+    end = _t + s["authDur"] * s["speed"] + s["holdSec"]
+    SC[s["key"]] = dict(start=_t, end=end, auth=s["authStart"], speed=s["speed"])
+    _t = end
+TOTAL = _t
+BOUNDARIES = [v["start"] for k, v in list(SC.items())[1:]]
+
+
+def R(key, auth_sec):
+    """Detik nyata mutlak untuk detik penulisan di scene `key`."""
+    v = SC[key]
+    return v["start"] + (auth_sec - v["auth"]) * v["speed"]
+
+
 N = int(TOTAL * SR) + SR  # +1 dtk ekor
 
 rng = np.random.default_rng(7)  # tetap: hasil identik tiap dijalankan
@@ -134,84 +150,163 @@ def m2f(m):
     return 440 * 2 ** ((m - 69) / 12)
 
 
+# ---------------- Sampel ----------------
+SAMPLES = ROOT / "audio" / "samples"
+
+
+def load_audio(path):
+    """Decode ke mono float 44,1 kHz lewat ffmpeg."""
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-f", "f32le", "-ac", "1",
+                          "-ar", str(SR), "-"], capture_output=True, check=True).stdout
+    return np.frombuffer(raw, dtype=np.float32).astype(np.float64)
+
+
+def override(name):
+    for ext in ("wav", "mp3", "ogg", "flac"):
+        p = SAMPLES / f"{name}.{ext}"
+        if p.exists():
+            x = load_audio(p)
+            return x / max(1e-9, np.abs(x).max()) * 0.9
+    return None
+
+
+def key_clicks():
+    """Potong satu per satu bunyi ketik dari rekaman keyboard (deteksi onset)."""
+    p = SAMPLES / "keyboard-clicks-source.mp3"
+    if not p.exists():
+        return None
+    x = load_audio(p)
+    h = hp(x, 1500)
+    k = int(0.004 * SR)
+    env = np.convolve(np.abs(h), np.ones(k) / k, mode="same")
+    thr = max(env.max() * 0.18, np.percentile(env, 90))
+    onsets, last = [], -10**9
+    for i in range(len(env)):
+        if env[i] > thr and i - last > int(0.06 * SR):
+            onsets.append(i)
+            last = i
+    clicks = []
+    for i in onsets:
+        a, b = max(0, i - int(0.008 * SR)), min(len(x), i + int(0.11 * SR))
+        c = x[a:b].copy()
+        if len(c) < int(0.05 * SR):
+            continue
+        c *= np.minimum(1, np.arange(len(c)) / (0.003 * SR))
+        c *= np.minimum(1, (len(c) - np.arange(len(c))) / (0.03 * SR))
+        peak = np.abs(c).max()
+        if peak > 0:
+            clicks.append(c / peak * 0.9)
+    return clicks
+
+
+CLICKS = key_clicks()
+OVR = {n: override(n) for n in ("plop", "tap", "pop", "whoosh", "swell", "click_full")}
+
+
 # ---------------- Efek suara ----------------
-def S(t_auth, shifted=True):
-    return t_auth + (SHIFT if shifted else 0)
+def typing(key, start_auth, text_len, cps, gain=0.5):
+    """Satu bunyi ketik per karakter, memakai klik keyboard asli (acak tetap)."""
+    t0 = R(key, start_auth)
+    for k in range(text_len):
+        tk = t0 + k / cps
+        if CLICKS:
+            c = CLICKS[int(rng.integers(len(CLICKS)))]
+            add(sfx, tk, c, gain * (0.75 + 0.25 * rng.random()))
+        else:
+            add(sfx, tk, tick(1 + 0.04 * (k % 3)), 0.22)
 
 
-def typing(start_auth, text_len, cps, shifted, gain=0.22):
-    n = text_len
-    for k in range(0, n, 2):  # klik tiap 2 karakter
-        add(sfx, S(start_auth, shifted) + k / cps, tick(1 + 0.04 * ((k // 2) % 3)), gain)
+def play(name, fn, t, gain, *args):
+    sig = OVR.get(name)
+    add(sfx, t, sig if sig is not None else fn(*args), gain)
 
 
-# Scene 1 (jam = absolut)
-typing(0.2, 30, 13, False)
-add(sfx, 1.0, sigh(0.6), 0.25)
+def e_plop(t, f, gain):
+    sig = OVR.get("plop")
+    if sig is not None:  # sampel diubah nadanya dengan resampling sederhana
+        ratio = f / 330.0
+        idx = np.arange(0, len(sig) - 1, ratio)
+        sig = np.interp(idx, np.arange(len(sig)), sig)
+        add(sfx, t, sig, gain)
+    else:
+        add(sfx, t, plop(f), gain)
 
-# Transisi lingkaran (swell di tiap batas, 0,5 dtk berpusat di batas)
+
+# Scene 1
+typing("hook", 0.2, 30, 11)
+add(sfx, R("hook", 1.0), sigh(0.6), 0.25)
+
+# Transisi lingkaran (swell berpusat di tiap batas)
 for b in BOUNDARIES:
-    add(sfx, b - 0.25, swell(0.5), 0.2)
+    play("swell", swell, b - TRANS / 2, 0.2, TRANS)
 
 # Scene 2
 for i, f in enumerate([523.25, 587.33, 659.25, 783.99]):  # biru, peach, hijau, kuning
-    add(sfx, S(3.2 + i * 0.12 + 0.42), plop(f * 0.5), 0.55)
-add(sfx, S(3.6), whoosh(0.35), 0.28)
-add(sfx, S(5.0), tap(), 0.5)
-add(sfx, S(5.0), plop(330), 0.5)
-add(sfx, S(5.7), whoosh(0.4, 400, 2500), 0.18)
+    e_plop(R("pick", 3.2 + i * 0.12 + 0.42), f * 0.5, 0.55)
+play("whoosh", whoosh, R("pick", 3.6), 0.28, 0.5)
+play("tap", tap, R("pick", 5.0), 0.5)
+e_plop(R("pick", 5.0), 330, 0.5)
+play("whoosh", whoosh, R("pick", 5.7), 0.18, 0.5, 400, 2500)
 
 # Scene 3
-add(sfx, S(6.9), whoosh(0.35), 0.28)
-add(sfx, S(7.4), tap(), 0.5)
-add(sfx, S(7.4), pop(560), 0.3)
-add(sfx, S(8.6), click_full(), 0.5)
-add(sfx, S(8.6) + 0.02, bell(1318.5, 0.5), 0.3)   # centang
-SCALE = [60, 62, 64, 67, 69, 72, 71]
-for i, m in enumerate(SCALE):                       # titik grafik muncul satu per satu
-    add(sfx, S(9.6 + i * (1.4 / 6)), bell(m2f(m + 12), 0.5), 0.18)
-add(sfx, S(11.0), bell(m2f(84), 0.8), 0.22)
+play("whoosh", whoosh, R("mood", 6.9), 0.28, 0.5)
+play("tap", tap, R("mood", 7.4), 0.5)
+play("pop", pop, R("mood", 7.4), 0.3, 560)
+play("click_full", click_full, R("mood", 8.6), 0.5)
+add(sfx, R("mood", 8.6) + 0.03, bell(1318.5, 0.5), 0.3)
+for i, m in enumerate([60, 62, 64, 67, 69, 72, 71]):   # titik grafik satu per satu
+    add(sfx, R("mood", 9.6 + i * (1.4 / 6)), bell(m2f(m + 12), 0.5), 0.18)
+add(sfx, R("mood", 11.0), bell(m2f(84), 0.8), 0.22)
 
 # Scene 4
-add(sfx, S(12.4), whoosh(0.4, 300, 2500), 0.2)
-add(sfx, S(12.7), whoosh(0.35), 0.28)
-add(sfx, S(13.8), tap(), 0.5)
-add(sfx, S(13.8), pop(520), 0.3)
-add(sfx, S(14.8), whoosh(0.45, 250, 2800), 0.22)
+play("whoosh", whoosh, R("assess", 12.4), 0.2, 0.5, 300, 2500)
+play("whoosh", whoosh, R("assess", 12.7), 0.28, 0.5)
+play("tap", tap, R("assess", 13.8), 0.5)
+play("pop", pop, R("assess", 13.8), 0.3, 520)
+play("whoosh", whoosh, R("assess", 14.8), 0.22, 0.6, 250, 2800)
 for i, m in enumerate([60, 64, 67]):
-    add(sfx, S(15.5 + i * 0.25), bell(m2f(m + 12), 0.6), 0.2)
-    add(sfx, S(15.5 + i * 0.25 + 0.8), pop(760), 0.22)
-add(sfx, S(17.0), pop(480), 0.4)
+    add(sfx, R("assess", 15.5 + i * 0.25), bell(m2f(m + 12), 0.6), 0.2)
+    play("pop", pop, R("assess", 15.5 + i * 0.25 + 0.8), 0.22, 760)
+play("pop", pop, R("assess", 17.0), 0.4, 480)
+
+# Scene Artikel
+play("whoosh", whoosh, R("article", 0.3), 0.28, 0.5)
+play("whoosh", whoosh, R("article", 0.8), 0.14, 0.45, 300, 2200)
+play("whoosh", whoosh, R("article", 1.15), 0.12, 0.45, 300, 2200)
+play("tap", tap, R("article", 2.3), 0.5)
+typing("article", 2.5, 5, 5)
+play("whoosh", whoosh, R("article", 3.3), 0.18, 0.5, 400, 2500)
+play("tap", tap, R("article", 4.8), 0.5)
+play("click_full", click_full, R("article", 4.8), 0.4)
 
 # Scene 5
-add(sfx, S(18.0), whoosh(0.35), 0.28)
-add(sfx, S(18.45), plop(260), 0.55)
-for k in range(5):  # langkah/meluncur robot
-    add(sfx, S(18.0) + 0.08 + k * 0.2, tap(), 0.12)
-add(sfx, S(18.6), pop(700), 0.35)
-add(sfx, S(18.85), pop(520), 0.4)
-typing(18.95, 26, 18, True)
-add(sfx, S(20.3), pop(480), 0.4)
+play("whoosh", whoosh, R("chat", 18.0), 0.28, 0.5)
+e_plop(R("chat", 18.45), 260, 0.55)
+for k in range(5):  # robot meluncur sambil memantul
+    play("tap", tap, R("chat", 18.0) + 0.14 + k * 0.28, 0.12)
+play("pop", pop, R("chat", 18.6), 0.35, 700)
+play("pop", pop, R("chat", 18.85), 0.4, 520)
+typing("chat", 18.95, 26, 14)
+play("pop", pop, R("chat", 20.3), 0.4, 480)
 for k in range(3):  # titik mengetik
-    add(sfx, S(20.35 + k * 0.17), tick(0.7), 0.15)
-typing(20.9, 32, 18, True, gain=0.2)
-add(sfx, S(21.15), plop(420), 0.3)
-add(sfx, S(22.1), plop(392), 0.55)
-add(sfx, S(22.2), bell(m2f(88), 0.9), 0.3)
-add(sfx, S(22.2), bell(m2f(95), 0.9), 0.2)
-add(sfx, S(22.3), sparkle(), 0.6)
+    add(sfx, R("chat", 20.35 + k * 0.17), tick(0.7), 0.15)
+typing("chat", 20.9, 32, 14)
+e_plop(R("chat", 21.15), 420, 0.3)
+e_plop(R("chat", 22.1), 392, 0.55)
+add(sfx, R("chat", 22.2), bell(m2f(88), 0.9), 0.3)
+add(sfx, R("chat", 22.2), bell(m2f(95), 0.9), 0.2)
+add(sfx, R("chat", 22.3), sparkle(), 0.6)
 
 # Scene 6
-add(sfx, S(23.2), pop(600), 0.45)
-add(sfx, S(23.6), whoosh(0.35), 0.28)
-add(sfx, S(24.1), whoosh(0.3, 800, 3000), 0.12)
-add(sfx, S(24.4), whoosh(0.4, 300, 2200), 0.2)
+play("pop", pop, R("cta", 23.2), 0.45, 600)
+play("whoosh", whoosh, R("cta", 23.6), 0.28, 0.5)
+play("whoosh", whoosh, R("cta", 24.1), 0.12, 0.4, 800, 3000)
+play("whoosh", whoosh, R("cta", 24.4), 0.2, 0.5, 300, 2200)
 for i, f in enumerate([523.25, 659.25, 783.99, 987.77, 1174.66]):  # lima blob melompat
     for r in range(3):
-        add(sfx, S(24.75 + i * 0.12 + r * 0.45), plop(f * 0.5), 0.26)
-add(sfx, S(24.6) + 0.4, tap(), 0.0)
-add(sfx, S(25.0), tap(), 0.5)
-add(sfx, S(25.0), click_full(), 0.55)
+        e_plop(R("cta", 24.75 + i * 0.12 + r * 0.45), f * 0.5, 0.26)
+play("tap", tap, R("cta", 25.0), 0.5)
+play("click_full", click_full, R("cta", 25.0), 0.55)
 
 # ---------------- Musik ----------------
 BPM = 84
@@ -245,12 +340,18 @@ def marimba(f, d=0.5):
 
 def mgain(t):
     """Kurva volume musik per bagian (0..1)."""
-    return float(np.interp(t, [0, 3.0, 3.6, 7.0, 18.0, 18.4, 23.2, 23.6, TOTAL - 1.8, TOTAL], [0.55, 0.6, 0.8, 0.9, 0.95, 1.1, 1.1, 1.1, 0.9, 0.0]))
+    s = list(SC.values())
+    b1, chat0, cta0 = s[1]["start"], SC["chat"]["start"], SC["cta"]["start"]
+    return float(np.interp(t, [0, b1 - 0.6, b1, chat0, chat0 + 0.4, cta0, TOTAL - 2.5, TOTAL],
+                           [0.55, 0.6, 0.8, 0.9, 1.1, 1.1, 0.9, 0.0]))
 
 
 def bar_chord(i, t0):
-    if t0 >= 23.6 - 0.01 and t0 + BAR > TOTAL - 3.3:
+    remaining = TOTAL - t0
+    if remaining <= 2 * BAR + 0.5:
         return "C"
+    if remaining <= 3 * BAR + 0.5:
+        return "G"
     return PROG[i % 4]
 
 
@@ -266,18 +367,19 @@ for i in range(nbars):
     for m in notes + [notes[0] + 12]:
         add(music, t0, pad_note(m, BAR + 0.9, 0.26), g)
     add(music, t0, pad_note(bass, BAR + 0.6, 0.26), g)
-    if t0 + BAR > 3.4:  # arpeggio mulai di Scene 2
-        arp_g = g * (1.0 if t0 + BAR > 18.0 else 0.8)
+    ARP0 = list(SC.values())[1]["start"] - 0.2
+    if t0 + BAR > ARP0:  # arpeggio mulai di Scene 2
+        arp_g = g * (1.0 if t0 + BAR > SC["chat"]["start"] else 0.8)
         for k, idx in enumerate(arp_pattern):
             tk = t0 + k * BEAT / 2
-            if tk < 3.4 or tk >= TOTAL - 0.2:
+            if tk < ARP0 or tk >= TOTAL - 0.2:
                 continue
             m = notes[idx] + 12
             add(music, tk, marimba(m2f(m), 0.55), 0.19 * arp_g * mgain(tk))
-    if t0 + BAR > 18.0:  # lapisan melodi tinggi saat puncak (Scene 5-6)
+    if t0 + BAR > SC["chat"]["start"]:  # lapisan melodi tinggi saat puncak (Scene 5-6)
         for k, idx in enumerate([2, 0, 1, 2]):
             tk = t0 + k * BEAT
-            if tk < 18.2 or tk >= TOTAL - 0.4:
+            if tk < SC["chat"]["start"] or tk >= TOTAL - 0.4:
                 continue
             add(music, tk, bell(m2f(notes[idx] + 24), 0.9, 0.2), 0.08 * mgain(tk))
 

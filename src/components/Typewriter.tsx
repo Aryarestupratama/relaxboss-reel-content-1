@@ -4,7 +4,7 @@
 import React, { type CSSProperties } from "react";
 import { COLORS, sec } from "../theme";
 import { typedLength } from "../motion";
-import { useVideoFrame } from "../sceneClock";
+import { useSceneSpeed, useVideoFrame } from "../sceneClock";
 
 type Props = {
   /** Satu elemen per baris. Spasi antar-baris dihitung sebagai satu karakter. */
@@ -18,13 +18,15 @@ type Props = {
 export const Typewriter: React.FC<Props> = ({
   lines,
   startSec,
-  charsPerSec = 13,
+  charsPerSec = 11,
   style,
   cursorColor = COLORS.navy,
 }) => {
   const frame = useVideoFrame();
+  // charsPerSec adalah kecepatan ketik NYATA; jam scene diperlambat, jadi dikali speed.
+  const speed = useSceneSpeed();
   const fullText = lines.join(" ");
-  const n = typedLength(frame, startSec, fullText, charsPerSec);
+  const n = typedLength(frame, startSec, fullText, charsPerSec * speed);
   const typing = frame >= sec(startSec) && n < fullText.length;
 
   const offsets: number[] = [];
