@@ -76,3 +76,9 @@ Jalankan `npm run render` dan `npm run render:45` lebih dulu. Jika timing scene 
 - **Audio**: bunyi ketik memakai rekaman keyboard di `audio/samples/keyboard-clicks-source.mp3` (dipotong per klik).
   Taruh `plop.wav`, `tap.wav`, `pop.wav`, `whoosh.wav`, `swell.wav` atau `click_full.wav` di `audio/samples/`
   untuk menggantikan suara sintetis dengan nama itu, lalu `npm run audio`.
+
+### Voice over
+
+Taruh rekaman VO utuh di `audio/samples/vo/vo-full.mp3` (urutan 9 kalimat, jeda antar-kalimat),
+jalankan `python3 audio/make_vo.py` (memotong menjadi `vo-01..09.wav`), lalu `npm run audio`.
+Titik tempat tiap klip ada di `VO_AT` pada `audio/make_audio.py`; musik turun otomatis saat VO bicara.

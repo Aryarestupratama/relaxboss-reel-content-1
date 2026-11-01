@@ -424,6 +424,21 @@ def write_wav(name, data):
         w.writeframes(np.stack([pcm], axis=1).tobytes())
 
 
+# ---------------- Voice over (opsional) ----------------
+# Klip vo-01..09.wav (hasil audio/make_vo.py) ditaruh di titik berikut (detik nyata).
+VO_AT = [1.4, R("pick", 3.9), R("mood", 7.0), R("assess", 12.8), R("assess", 16.2),
+         R("article", 1.0), R("chat", 18.3), R("chat", 21.5), R("cta", 23.7)]
+vo = np.zeros(N)
+VO_DIR = ROOT / "audio" / "samples" / "vo"
+vo_clips = sorted(VO_DIR.glob("vo-[0-9][0-9].wav")) if VO_DIR.exists() else []
+for i, p in enumerate(vo_clips[: len(VO_AT)]):
+    clip = load_audio(p)
+    add(vo, VO_AT[i], clip, 1.0)
+    end = VO_AT[i] + len(clip) / SR
+    nxt = VO_AT[i + 1] if i + 1 < len(VO_AT) else TOTAL
+    flag = "  <-- TUMPANG TINDIH dengan klip berikutnya" if end > nxt else ""
+    print(f"VO {i + 1}: {VO_AT[i]:6.2f} - {end:6.2f}{flag}")
+
 # Pelembut: efek dipangkas di atas 10 kHz (klik tajam jadi tidak menusuk)
 sfx = lp(hp(sfx, 30, 1), 10000, 2)
 
@@ -432,7 +447,11 @@ env = np.abs(sfx)
 win = int(0.08 * SR)
 env = np.convolve(env, np.ones(win) / win, mode="same")
 duck = 1 - 0.35 * np.clip(env / 0.25, 0, 1)
-mix = music * 0.5 * duck + sfx * 1.0
+# Musik (dan sedikit efek) turun saat VO bicara
+venv = np.convolve(np.abs(vo), np.ones(int(0.15 * SR)) / int(0.15 * SR), mode="same")
+vduck = 1 - 0.6 * np.clip(venv / 0.12, 0, 1)
+sduck = 1 - 0.3 * np.clip(venv / 0.12, 0, 1)
+mix = music * 0.5 * duck * vduck + sfx * sduck + vo * 1.0
 cut = int(TOTAL * SR)
 mix, music_only = mix[:cut], (music * 0.5)[:cut]
 write_wav("relaxboss-music.wav", master(music_only, 0.8))
