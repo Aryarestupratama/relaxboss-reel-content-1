@@ -449,9 +449,16 @@ env = np.convolve(env, np.ones(win) / win, mode="same")
 duck = 1 - 0.35 * np.clip(env / 0.25, 0, 1)
 # Musik (dan sedikit efek) turun saat VO bicara
 venv = np.convolve(np.abs(vo), np.ones(int(0.15 * SR)) / int(0.15 * SR), mode="same")
-vduck = 1 - 0.6 * np.clip(venv / 0.12, 0, 1)
-sduck = 1 - 0.3 * np.clip(venv / 0.12, 0, 1)
-mix = music * 0.5 * duck * vduck + sfx * sduck + vo * 1.0
+vduck = 1 - 0.75 * np.clip(venv / 0.12, 0, 1)
+sduck = 1 - 0.5 * np.clip(venv / 0.12, 0, 1)
+MUSIC_GAIN = 0.16  # musik hanya pengisi; VO yang utama
+mix_music = music * MUSIC_GAIN * duck * vduck
+mix_sfx = sfx * sduck
+mix = mix_music + mix_sfx + vo * 1.0
+if vo_clips:
+    on = np.abs(vo) > 0.02
+    rms = lambda a: 20 * np.log10(np.sqrt((a[on] ** 2).mean()) + 1e-9)
+    print(f"Saat VO bicara (dBFS RMS): VO {rms(vo):.1f} | musik {rms(mix_music):.1f} | efek {rms(mix_sfx):.1f}")
 cut = int(TOTAL * SR)
 mix, music_only = mix[:cut], (music * 0.5)[:cut]
 write_wav("relaxboss-music.wav", master(music_only, 0.8))
