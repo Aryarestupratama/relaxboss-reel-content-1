@@ -30,9 +30,10 @@ const mix = (a: string, b: string, t: number): string => {
   return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(",")})`;
 };
 
-const USER_TEXT = ["Capek banget", "sama skripsi."];
-const BOT_TEXT = ["Kedengarannya berat.", "Mau cerita?"];
-const CPS = 14; // karakter per detik NYATA
+const USER_TEXT = ["Lagi capek banget", "sama skripsi."];
+const BOT_TEXT = ["Kedengarannya berat.", "Mau cerita pelan-pelan?"];
+const CPS_USER = 14; // karakter per detik NYATA
+const CPS_BOT = 16;
 
 const Dots: React.FC<{ frame: number; x: number; y: number }> = ({ frame, x, y }) => (
   <div style={{ position: "absolute", left: x, top: y, display: "flex", gap: 20 }}>
@@ -150,7 +151,7 @@ export const Scene5Chat: React.FC = () => {
           <Typewriter
             lines={USER_TEXT}
             startSec={18.95}
-            charsPerSec={CPS}
+            charsPerSec={CPS_USER}
             style={{
               position: "absolute",
               left: 40,
@@ -199,7 +200,7 @@ export const Scene5Chat: React.FC = () => {
               <Typewriter
                 lines={BOT_TEXT}
                 startSec={20.9}
-                charsPerSec={CPS}
+                charsPerSec={CPS_BOT}
                 style={{
                   position: "absolute",
                   left: 40,

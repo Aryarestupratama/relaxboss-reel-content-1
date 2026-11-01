@@ -286,11 +286,11 @@ for k in range(5):  # robot meluncur sambil memantul
     play("tap", tap, R("chat", 18.0) + 0.14 + k * 0.28, 0.12)
 play("pop", pop, R("chat", 18.6), 0.35, 700)
 play("pop", pop, R("chat", 18.85), 0.4, 520)
-typing("chat", 18.95, 26, 14)
+typing("chat", 18.95, 31, 14)
 play("pop", pop, R("chat", 20.3), 0.4, 480)
 for k in range(3):  # titik mengetik
     add(sfx, R("chat", 20.35 + k * 0.17), tick(0.7), 0.15)
-typing("chat", 20.9, 32, 14)
+typing("chat", 20.9, 44, 16)
 e_plop(R("chat", 21.15), 420, 0.3)
 e_plop(R("chat", 22.1), 392, 0.55)
 add(sfx, R("chat", 22.2), bell(m2f(88), 0.9), 0.3)
